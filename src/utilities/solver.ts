@@ -11,8 +11,8 @@ export async function solve(day: number) {
 }
 
 export interface Solution {
-    solvePart1: (input: string[]) => Promise<string>;
-    solvePart2: (input: string[]) => Promise<string>;
+    solvePart1: (input: string[]) => Promise<string | number>;
+    solvePart2: (input: string[]) => Promise<string | number>;
 }
 
 async function getDefaultImport(path: string) {

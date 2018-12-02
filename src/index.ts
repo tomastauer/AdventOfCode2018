@@ -1,7 +1,7 @@
 import { solve } from "./utilities/solver";
 
 (async function() {
-    const day = 1;
+    const day = 2;
 
     console.log(await solve(day));
 })();
