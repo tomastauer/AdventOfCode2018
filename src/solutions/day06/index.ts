@@ -1,9 +1,10 @@
 import { Solution } from 'src/utilities/solver';
 import { areAllItemsSame, groupBy, findMostOftenItem } from '../../utilities/array';
+var PNGImage = require('pngjs-image');
 
 export default class Day02 implements Solution {
     async solvePart1(input: string[]) {
-        let canvasSize = 358;
+        let canvasSize = 380;
         const canvas = initializeCanvas(canvasSize);
         const parsedInput = parseInput(input);
         initializeWithInputDistance(canvas, parsedInput);
@@ -13,8 +14,28 @@ export default class Day02 implements Solution {
     }
 
     async solvePart2(input: string[]) {
-        return '';
+        let canvasSize = 380;
+        const canvas = initializeCanvas(canvasSize);
+        const parsedInput = parseInput(input);
+        return (([] as number[]).concat(...extractDistance(computeAggregatedDistanceMap(canvas, parsedInput)))).reduce((agg, curr) => {
+            if(curr < 10000) {
+                agg++;
+            }
+
+            return agg;
+        }, 0);
     }
+}
+
+
+function computeAggregatedDistanceMap(canvas: Distance[][], points: Point[]) {
+    for(let x = 0; x < canvas.length; x++) {
+        for(let y = 0; y < canvas.length; y++) {
+            canvas[x][y].distance = getDistances({x, y}, points).reduce((agg, curr) => agg + curr, 0);
+        }
+    }
+
+    return canvas;
 }
 
 function computeDistanceMap(canvas: Distance[][]) {
@@ -55,10 +76,9 @@ function removeBoundaryAreas(canvas: Distance[][]) {
         boundaries.add(canvas[0][d].from);
         boundaries.add(canvas[canvas.length-1][d].from);
         boundaries.add(canvas[d][0].from);
-        boundaries.add(canvas[canvas.length-1][d].from);
+        boundaries.add(canvas[d][canvas.length-1].from);
     }
 
-    console.log(boundaries);
     for(let x = 0; x < canvas.length; x++) {
         for(let y = 0; y < canvas.length; y++) {
             if(boundaries.has(canvas[x][y].from!)) {
@@ -96,7 +116,7 @@ function trimCanvas(canvas: Distance[][]) {
 }
 
 function parseInput(lines: string[]): Point[] {
-    return  lines.map(line => line.split(',').map(p => parseInt(p, 10)+1)).map(i => ({x: i[1], y: i[0]}));
+    return lines.map(line => line.split(',').map(p => parseInt(p, 10)+1)).map(i => ({x: i[1], y: i[0]}));
 }
 
 function initializeWithInputDistance(canvas: Distance[][], points: Point[]) {
@@ -117,4 +137,8 @@ interface Distance {
 
 function extractFrom(canvas: Distance[][]) {
     return canvas.map(row => row.map(col => col.from));
+}
+
+function extractDistance(canvas: Distance[][]) {
+    return canvas.map(row => row.map(col => col.distance));
 }
