@@ -24,3 +24,7 @@ export function findMostOftenItem(items: (string|number)[]) {
         occurrences: maxKey
     };
 }
+
+export function areAllItemsSame<T>(items: T[]) {
+    return Array.from(new Set(items)).length === 1;
+}

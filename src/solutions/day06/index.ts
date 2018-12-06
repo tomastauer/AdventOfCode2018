@@ -1,15 +1,15 @@
 import { Solution } from 'src/utilities/solver';
-import { format } from 'path';
+import { areAllItemsSame, groupBy, findMostOftenItem } from '../../utilities/array';
 
 export default class Day02 implements Solution {
     async solvePart1(input: string[]) {
-        let canvasSize = 14;
+        let canvasSize = 358;
         const canvas = initializeCanvas(canvasSize);
-        initializeWithInputDistance(canvas, input);
+        const parsedInput = parseInput(input);
+        initializeWithInputDistance(canvas, parsedInput);
         const distanceMap = computeDistanceMap(canvas);
-        
-        console.log(extractFrom(distanceMap));
-        return '';
+        const withoutBoundaries = removeBoundaryAreas(trimCanvas(removeSameDistances(distanceMap, parsedInput)));
+        return findMostOftenItem(([] as number[]).concat(...extractFrom(withoutBoundaries)).filter(c => c !== 0)).occurrences;
     }
 
     async solvePart2(input: string[]) {
@@ -30,24 +30,58 @@ function computeDistanceMap(canvas: Distance[][]) {
         }
     }
 
-    return trimCanvas(canvas);
+    return canvas;
+}
+
+function removeSameDistances(canvas: Distance[][], originalPoints: Point[]) {
+    for(let x = 0; x < canvas.length; x++) {
+        for(let y = 0; y < canvas.length; y++) {
+            if(getDistances({x, y}, originalPoints).filter(d => d === canvas[x][y].distance).length > 1){
+                canvas[x][y].from = 0;
+            }
+        }
+    }
+
+    return canvas;
+}
+
+function getDistances(point: Point, points: Point[]) {
+    return points.map(p => Math.abs(point.x - p.x) + Math.abs(point.y - p.y));
+}
+
+function removeBoundaryAreas(canvas: Distance[][]) {
+    const boundaries = new Set<number>();
+    for(let d = 0; d < canvas.length; d++) {
+        boundaries.add(canvas[0][d].from);
+        boundaries.add(canvas[canvas.length-1][d].from);
+        boundaries.add(canvas[d][0].from);
+        boundaries.add(canvas[canvas.length-1][d].from);
+    }
+
+    console.log(boundaries);
+    for(let x = 0; x < canvas.length; x++) {
+        for(let y = 0; y < canvas.length; y++) {
+            if(boundaries.has(canvas[x][y].from!)) {
+                canvas[x][y].from = 0;
+            }
+        }
+    }
+
+    return canvas;
 }
 
 function selectCorrectDistance(root: Distance, x: Distance, y: Distance): Distance {
     const minDistance = Math.min(root.distance, x.distance + 1, y.distance + 1);
-    const result = root.distance === minDistance ? root : x.distance > y.distance ? ({ from: y.from, distance: y.distance + 1 }) : ({ from: x.from, distance: x.distance + 1 })
-
-    if(root.distance === x.distance + 1 || x.distance + 1 === y.distance + 1 || root.distance === y.distance + 1) {
-        result.invalid = true;
+    if(root.distance === minDistance) {
+        return root;
     }
 
-    return result;
+    return x.distance < y.distance ? ({ from: x.from, distance: x.distance + 1 }) : ({ from: y.from, distance: y.distance + 1 });
 }
 
 function initializeCanvas(canvasSize: number) {
     return Array.from({length:canvasSize}, () => Array.from({length:canvasSize}, () => ({ distance: 1000 }) as Distance));
 }
-
 
 function trimCanvas(canvas: Distance[][]) {
     const newSize = canvas.length - 2;
@@ -61,20 +95,26 @@ function trimCanvas(canvas: Distance[][]) {
     return newCanvas;
 }
 
-function initializeWithInputDistance(canvas: Distance[][], lines: string[]) {
-    console.log(lines);
-    lines.map(line => line.split(',').map(p => parseInt(p, 10)+1)).forEach((input, index) => {
-        canvas[input[1]][input[0]] = { from: index + 1, distance: 0 } as Distance;
+function parseInput(lines: string[]): Point[] {
+    return  lines.map(line => line.split(',').map(p => parseInt(p, 10)+1)).map(i => ({x: i[1], y: i[0]}));
+}
+
+function initializeWithInputDistance(canvas: Distance[][], points: Point[]) {
+    points.forEach((point, index) => {
+        canvas[point.x][point.y] = { from: index + 1, distance: 0 } as Distance;
     });
 }
 
+interface Point {
+    x: number;
+    y: number;
+}
 interface Distance {
-    from?: number;
+    from: number;
     distance: number;
     invalid?: boolean;
 }
 
 function extractFrom(canvas: Distance[][]) {
-    return canvas.map(row => row.map(col => col.invalid ? '.' : '#'));
+    return canvas.map(row => row.map(col => col.from));
 }
-
