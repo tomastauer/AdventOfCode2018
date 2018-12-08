@@ -28,3 +28,7 @@ export function findMostOftenItem(items: (string|number)[]) {
 export function areAllItemsSame<T>(items: T[]) {
     return Array.from(new Set(items)).length === 1;
 }
+
+export function sum(items: number[]) {
+    return items.reduce((agg, curr) => agg + curr, 0);
+}
