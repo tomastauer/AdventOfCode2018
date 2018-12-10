@@ -39,7 +39,8 @@ export default class Day02 implements Solution {
     }
 
     async solvePart2(input: string[]) {
-        return '';
+        const parsedInput = parseInput(input[0]);
+        return this.solvePart1([`${parsedInput.numberOfPlayer} players; last marble is worth ${parsedInput.lastMarble * 100} points`]);
     }
 }
 
