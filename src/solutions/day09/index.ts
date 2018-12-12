@@ -4,36 +4,55 @@ import { numberRange } from '../../utilities/array';
 export default class Day02 implements Solution {
     async solvePart1(input: string[]) {
         const parsedInput = parseInput(input[0]);
-        const gameBoard = [] as number[];
-        const score = numberRange(0, parsedInput.numberOfPlayer).map(_ => 0);
-        let currentIndex = 0;
+        const gameBoard = {
+            id: 0
+        } as Item;
+        gameBoard.next = gameBoard;
+        gameBoard.prev = gameBoard;
+        
+        let currentItem = gameBoard;
         let currentPlayer = 1;
 
+        const score = numberRange(0, parsedInput.numberOfPlayer).map(_ => 0);
+
         for(let i = 1; i < parsedInput.lastMarble; i++) {
+            const newItem = {
+                id: i,
+                prev: currentItem.next,
+                next: currentItem.next.next
+            };
+
             if(i > 0 && i % 23 === 0) {
-                currentIndex = getNextIndex(gameBoard, currentIndex, -9);
-                const scoreAddition = gameBoard.splice(currentIndex, 1)[0] + i;
-                score[currentPlayer - 1] += scoreAddition;
+                currentItem = currentItem.prev.prev.prev.prev.prev.prev;
+                score[currentPlayer - 1] += currentItem.prev.id + i;
+                removeItem(currentItem.prev);
             } else {
-                gameBoard.splice(currentIndex, 0, i);
+                currentItem = newItem;
+                currentItem.prev.next = currentItem;
+                currentItem.next.prev = currentItem;
             }
 
-            currentIndex = getNextIndex(gameBoard, currentIndex, 2);
             currentPlayer = getNextPlayer(currentPlayer, parsedInput.numberOfPlayer);
-            if (i % 1000 === 0) {
-                console.log(i);
-            }
         }
- 
+
         return Math.max(...score);
     }
 
     async solvePart2(input: string[]) {
-        return '';
+        const parsedInput = parseInput(input[0]);
+        return this.solvePart1([`${parsedInput.numberOfPlayer} players; last marble is worth ${parsedInput.lastMarble * 100} points`]);
     }
+}
 
-    
-    
+function removeItem(item: Item) {
+    item.prev.next = item.next;
+    item.next.prev = item.prev;
+}
+
+interface Item {
+    next: Item;
+    prev: Item;
+    id: number;
 }
 
 interface Input {
