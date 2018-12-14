@@ -40,9 +40,6 @@ export default class Day02 implements Solution {
             counter += makeNewRecipe2(elf1, elf2, recipes, counter);
             elf1 = getNextPosition(elf1, recipes, counter);
             elf2 = getNextPosition(elf2, recipes, counter);
-            if(counter % 10000 === 0) {
-                console.log(counter);
-            }
         }
 
         return counter - sequence.length;
