@@ -35,7 +35,7 @@ export default class Day02 implements Solution {
         let lastMinusNRecipe = undefined;
         let counter = 0;
 
-        while(!containsSequence(sequence, lastMinusNRecipe)) {
+        while(counter < 21000000) {
             if(counter === 5) {
                 lastMinusNRecipe = firstRecipe;
             }
