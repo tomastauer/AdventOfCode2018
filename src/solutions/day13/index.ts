@@ -1,4 +1,5 @@
 import { Solution } from 'src/utilities/solver';
+const solution = require('./test')[1];
 
 export default class Day02 implements Solution {
     async solvePart1(input: string[]) {
@@ -22,16 +23,24 @@ export default class Day02 implements Solution {
         const track = parsedInput[1] as string[][];
 
         while(trains.length > 1) {
+            const before = JSON.parse(JSON.stringify(trains));
             trains.forEach(t => {
                 tickTrain(t, track);
             });
-
+            
+            isSwap(before, trains);
             while(isCrash(trains)) {
                 trains = removeCrashedTrains(trains);
             }
         }
-
+        console.log(trains[0]);
         return `${trains[0].position.x},${trains[0].position.y}`;
+    }
+}
+
+function isSwap(trainsA: Train[], trainsB: Train[]) {
+    if(trainsA.filter(t => trainsB.some(tb => tb.position.x === t.position.x && tb.position.y === t.position.y)).length) {
+        return 'swapped';
     }
 }
 
